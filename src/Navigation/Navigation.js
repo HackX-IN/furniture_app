@@ -37,7 +37,7 @@ export default function MyTabs() {
         options={{
           headerShown:false,
           tabBarIcon: ({ color, size,focused }) => (
-            <Icon name={focused?"home":"home-outline"} size={24} color={focused?Colors.dimgrey:Colors.gray} />
+            <Icon name={focused?"home":"home-outline"} size={24} color={focused?Colors.green:Colors.gray} />
           ),
           
         }}
@@ -48,7 +48,7 @@ export default function MyTabs() {
         options={{
           headerShown:false,
           tabBarIcon: ({ color, size,focused }) => (
-            <Icon name="search-sharp" size={24} color={focused?Colors.dimgrey:Colors.gray}  />
+            <Icon name="search-sharp" size={24} color={Colors.gray}  />
           ),
           
         }}
@@ -58,8 +58,9 @@ export default function MyTabs() {
         component={ProfileScreen}
         options={{
           headerShown:false,
+         
             tabBarIcon: ({ color, size,focused }) => (
-              <Icon name={focused?"person":"person-outline"} size={24} color={focused?Colors.dimgrey:Colors.gray}  />
+              <Icon name={focused?"person":"person-outline"} size={24} color={focused?Colors.green:Colors.gray}  />
             ),
             
           }}
