@@ -1,4 +1,5 @@
 const User = require('../Models/UserModel');
+const Product = require('../Models/Product');
 const jwt = require('jsonwebtoken');
 const { hashPassword,ComparePassword } = require('../Middleware/hashPassword');
 
@@ -69,5 +70,90 @@ module.exports = {
       res.status(500).json("Failed to get user");
     }
   },
- 
+addToWishlist : async (req, res) => {
+    const { userId, productId } = req.params;
+    try {
+      // Check if the user exists
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json("User not found");
+      }
+  
+      // Check if the product exists
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json("Product not found");
+      }
+  
+      // Check if the product is already in the user's wishlist
+      if (user.wishlist.includes(productId)) {
+        return res.status(400).json("Product is already in the wishlist");
+      }
+  
+      // Add the product's ObjectId to the user's wishlist
+      user.wishlist.push(productId);
+      await user.save();
+  
+      // Populate the wishlist array with the product name and imageUrl
+      const populatedWishlist = await User.findById(userId).populate({
+        path: 'wishlist',
+        select: 'title imageUrl price', // Only retrieve 'name', 'imageUrl', and 'price' properties of the products
+      });
+  
+      res.status(200).json(populatedWishlist);
+    } catch (error) {
+      console.error("Error adding product to wishlist:", error);
+      res.status(500).json("Failed to add product to wishlist");
+    }
+  },
+  
+ removeFromWishlist : async (req, res) => {
+    const { userId, productId } = req.params;
+    try {
+      // Check if the user exists
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json("User not found");
+      }
+  
+      // Check if the product exists
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json("Product not found");
+      }
+  
+      // Check if the product is in the user's wishlist
+      if (!user.wishlist.includes(productId)) {
+        return res.status(400).json("Product is not in the wishlist");
+      }
+  
+      // Remove the product's ObjectId from the user's wishlist
+      user.wishlist = user.wishlist.filter(item => item.toString() !== productId);
+      await user.save();
+  
+      res.status(200).json(user);
+    } catch (error) {
+      console.error("Error removing product from wishlist:", error);
+      res.status(500).json("Failed to remove product from wishlist");
+    }
+  },
+  getWishlist : async (req, res) => {
+    const { userId } = req.params;
+    try {
+      // Check if the user exists
+      const user = await User.findById(userId).populate('wishlist', 'title imageUrl price'); // Only retrieve 'name', 'imageUrl', and 'price' properties of the products
+      if (!user) {
+        return res.status(404).json("User not found");
+      }
+  
+      res.status(200).json(user.wishlist);
+    } catch (error) {
+      console.error("Error getting user wishlist:", error);
+      res.status(500).json("Failed to get user wishlist");
+    }
+  }
+  
+  
+
 };
+

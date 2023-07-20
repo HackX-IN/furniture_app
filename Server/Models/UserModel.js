@@ -14,7 +14,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product' // Assuming you have a Product model defined
+    }
+  ]
+
 }, {
   timestamps: true
 });

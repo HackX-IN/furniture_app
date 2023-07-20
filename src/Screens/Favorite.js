@@ -1,128 +1,156 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  Platform,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, SafeAreaView,Image, Dimensions,TouchableOpacity,ActivityIndicator } from 'react-native';
+import axios from 'axios';
+import jwt_decode from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Dimensions } from "react-native";
-import { Entypo, MaterialIcons } from "@expo/vector-icons";
+import { Colors } from '../Assets';
 
+import { AntDesign } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 const { width, height } = Dimensions.get("window");
-const Favorite = ({ navigation }) => {
-  const [favoriteItem, setFavoriteItem] = useState(null);
+
+const Favorite = (
+  {navigation}
+) => {
+  const [wishlist, setWishlist] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Function to retrieve the favorite item from AsyncStorage
-    const fetchFavoriteItem = async () => {
-      try {
-        const storedItem = await AsyncStorage.getItem("favoriteItem");
-        if (storedItem) {
-          setFavoriteItem(JSON.parse(storedItem));
-        }
-      } catch (error) {
-        // Handle AsyncStorage errors
-        console.error("Error fetching favorite item:", error);
-      }
-    };
-
-    fetchFavoriteItem(); // Call the function when the component mounts
+    retrieveToken();
   }, []);
 
-  const removeFavoriteItem = async () => {
+  const retrieveToken = async () => {
     try {
-      await AsyncStorage.removeItem("favoriteItem");
-      setFavoriteItem(null);
+      const token = await AsyncStorage.getItem("token");
+
+      if (token) {
+        const decodedToken = jwt_decode(token);
+       
+        const { name, email,userId } = decodedToken;
+       
+        setUser({ name, email,userId});
+      }
     } catch (error) {
-      console.error("Error removing favorite item:", error);
+      console.log(error);
     }
   };
+ 
+  const userId = user?.userId; // Replace with the actual userId
+  useEffect(() => {
+    // Fetch the user's wishlist
+    const fetchWishlist = async () => {
+      try {
+        const response = await axios.get(`https://productserver-4mtw.onrender.com/api/v1/user/${userId}/wishlist`);
+        setWishlist(response.data);
+        setLoading(false); // Set loading to false after fetching data
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+        setLoading(false); // Set loading to false in case of an error
+      }
+    };
+  
+    if (userId) {
+      fetchWishlist();
+    }
+  }, [userId]);
+  
+  const removeFromWishlist = async (productId) => {
+    try {
+      setLoading(true); // Set loading to true before making the API request
+  
+      const response = await axios.delete(
+        `https://productserver-4mtw.onrender.com/api/v1/user/${userId}/wishlist/${productId}`
+      );
+  
+      setWishlist(response.data.wishlist);
+      setLoading(false); // Set loading to false after fetching data
+  
+      Toast.show({
+        type: 'success',
+        text1: 'Product removed Successfully',
+        position: 'top',
+        visibilityTime: 2000, // 2 seconds
+        autoHide: true,
+      });
+    } catch (error) {
+      console.error("Error removing product from wishlist:", error);
+      setLoading(false); // Set loading to false in case of an error
+  
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to remove product',
+        position: 'top',
+        visibilityTime: 3000, // 3 seconds
+        autoHide: true,
+      });
+    }
+  };
+  
+  
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ marginTop: Platform.OS === "android" ? 40 : 10 }}>
-    <TouchableOpacity onPress={()=>navigation.goBack()} style={{flexDirection:"row",justifyContent:"center",alignItems:"center"}}>
-    
-   
-        
-          <Text style={styles.text}>Favorite</Text>
-          </TouchableOpacity>
-        {favoriteItem && (
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{
-              padding: 10,
-              backgroundColor: "gray",
-              width: width - 80,
-              flexDirection: "row",
-              borderRadius: 30,
-              marginLeft: -20,
-            }}
-          >
-            <Image
-              source={{ uri: favoriteItem.imageUrl }}
-              style={{ width: 80, height: 80, borderRadius: 50 }}
-            />
-            <View style={{ marginLeft: 10, flexDirection: "column" }}>
-              <Text
-                style={{ fontWeight: "bold", fontSize: 18, color: "white" }}
-              >
-                {favoriteItem.title}
-              </Text>
-              <Text
-                style={{ fontWeight: "bold", fontSize: 14, color: "black" }}
-              >
-                {favoriteItem.price}
-              </Text>
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  fontSize: 12,
-                  color: "black",
-                  width: width - 190,
-                }}
-                numberOfLines={2}
-              >
-                {favoriteItem.description}
-              </Text>
-            </View>
-            {/* Add other properties as needed */}
-            <View style={{ alignItems: "flex-end", right: 28 }}>
-              <TouchableOpacity onPress={removeFavoriteItem}>
-                <MaterialIcons name="delete-outline" size={28} color="black" />
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+    <View style={{marginTop:20}}>
+     <TouchableOpacity onPress={()=>navigation.goBack()} style={{position:"absolute",top:6,left:5,zIndex:999}}>
+     <AntDesign name="back" size={24} color="black" />
+     </TouchableOpacity>
+      <Text style={styles.header}>Favorite Products</Text>
+      {loading ? ( // Display the loading indicator while loading is true
+      <ActivityIndicator size="large" color="blue"  />
+    ) : (
+      <FlatList
+        data={wishlist}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <View style={styles.product}>
+          <Image source={{uri:item.imageUrl}} style={{width:80,height:80,borderRadius:50,marginLeft:5,resizeMode:"cover"}}/>
+         <View style={{flexDirection:"column",marginLeft:10}}>
+         <Text style={styles.productName}>{item.title}</Text>
+         <Text style={styles.productPrice}>{item.price}</Text>
+         </View>
+         <TouchableOpacity onPress={() => removeFromWishlist(item._id)} style={{top:30,position:"absolute",right:15}}>
+         <AntDesign name="delete" size={24} color="black" />
+         </TouchableOpacity>
+          </View>
         )}
-      </View>
+      />)}
+    </View>
     </SafeAreaView>
   );
 };
-export default Favorite;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-
-    backgroundColor: "white",
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
+    padding: 16,
+    backgroundColor: '#fff',
     
   },
-  itemContainer: {
-    padding: 10,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 5,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 10,
-    width: 200,
-    alignItems: "center",
+    textAlign:"center"
+  },
+  product: {
+    marginBottom: 15,
+    flexDirection:"row",
+    alignItems:"center",
+    width:width-40,
+    backgroundColor:Colors.burlywood,
+    height:90,
+    borderRadius:30
+  },
+  productName: {
+    fontSize: 18,
+    fontWeight:"600"
+  },
+  productPrice: {
+    fontSize: 14,
+    color: 'gray',
+    padding:2
   },
 });
-// Add more
+
+export default Favorite;

@@ -14,32 +14,41 @@ import { Sizes, Colors } from "../Assets/index";
 import { AntDesign } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import jwt_decode from "jwt-decode";
+import Toast from 'react-native-toast-message';
 
 const { width, height } = Dimensions.get("window");
 
 const ProductPage = ({ navigation, route }) => {
   const [count, setCount] = useState(1);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [favoriteItem, setFavoriteItem] = useState(null);
+  const [saved, setSaved] = useState(false);
 
-  const { item } = route.params;
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const fetchFavoriteItem = async () => {
-      try {
-        const storedItem = await AsyncStorage.getItem("favoriteItem");
-        if (storedItem) {
-          setFavoriteItem(JSON.parse(storedItem));
-          setIsFavorite(true); // If item exists in AsyncStorage, set isFavorite to true
-        }
-      } catch (error) {
-        console.error("Error fetching favorite item:", error);
-      }
-    };
-
-    fetchFavoriteItem();
+    retrieveToken();
   }, []);
 
+  const retrieveToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (token) {
+        const decodedToken = jwt_decode(token);
+        console.log(decodedToken)
+        const { name, email,userId } = decodedToken;
+       
+        setUser({ name, email,userId});
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+ 
+
+  const { item } = route.params;
+  
   const Increment = () => {
     setCount(count + 1);
   };
@@ -48,16 +57,32 @@ const ProductPage = ({ navigation, route }) => {
       setCount(count - 1);
     }
   };
-  const toggleFavorite = async () => {
-    setIsFavorite((prevIsFavorite) => !prevIsFavorite);
+  const userId = user?.userId; // Replace with the actual userId
+  const productId = item?._id;
+  const addToWishlist = async () => {
     try {
-      if (!isFavorite) {
-        await AsyncStorage.setItem("favoriteItem", JSON.stringify(item));
-      } else {
-        await AsyncStorage.removeItem("favoriteItem");
-      }
+      const response = await axios.post(`https://productserver-4mtw.onrender.com/api/v1/user/${userId}/wishlist/${productId}`);
+      
+      console.log(response.data);
+      setSaved(true)
+      Toast.show({
+        type: 'success',
+        text1: 'Product Added Successfully',
+        position: 'top',
+        visibilityTime: 2000, // 2 seconds
+        autoHide: true,
+      }); // The updated user object with wishlist
     } catch (error) {
-      console.error("Error saving favorite item:", error);
+      
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: 'Please check your email and password.',
+        position: 'top',
+        visibilityTime: 3000, // 3 seconds
+        autoHide: true,
+      });
+      console.error(error);
     }
   };
 
@@ -79,13 +104,14 @@ const ProductPage = ({ navigation, route }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="chevron-back-circle" size={28} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleFavorite}>
-          {isFavorite ? (
-            <Entypo name="heart" size={24} color="red" />
-          ) : (
-            <Feather name="heart" size={24} color="black" />
-          )}
-        </TouchableOpacity>
+       { saved ?  (<TouchableOpacity > 
+        <AntDesign name="heart" size={24} color="red" />
+        </TouchableOpacity>):(
+          <TouchableOpacity onPress={addToWishlist} >
+          <Feather name="heart" size={24} color="black" />
+          </TouchableOpacity>
+        )}
+      
       </View>
       <Image
         source={{

@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Button, Image,TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwt_decode from "jwt-decode";
@@ -10,11 +17,11 @@ import {
   Entypo,
   MaterialCommunityIcons,
   AntDesign,
-  MaterialIcons
+  MaterialIcons,
 } from "@expo/vector-icons";
 
 import { Sizes, Colors } from "../Assets/index";
-import Toast from 'react-native-toast-message';
+import Toast from "react-native-toast-message";
 
 import { Dimensions } from "react-native";
 import { ActivityIndicator } from "react-native";
@@ -42,45 +49,44 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
-
   const handleLogout = async () => {
     try {
       // Remove the token from AsyncStorage
       await AsyncStorage.removeItem("token");
-  
+
       // Show toast message for successful logout
       Toast.show({
-        type: 'success',
-        text1: 'Logged Out Successfully',
-        position: 'top',
+        type: "success",
+        text1: "Logged Out Successfully",
+        position: "top",
         visibilityTime: 2000, // 2 seconds
         autoHide: true,
       });
-  
+
       // Navigate to the login screen or any other screen
       navigation.navigate("Login");
     } catch (error) {
       console.log(error);
       Toast.show({
-        type: 'error',
-        text1: 'Login Failed',
-        text2: 'Please check your email and password.',
-        position: 'top',
+        type: "error",
+        text1: "Login Failed",
+        text2: "Please check your email and password.",
+        position: "top",
         visibilityTime: 3000, // 3 seconds
         autoHide: true,
       });
     }
   };
 
-  
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ marginTop: Platform.OS === "android" ? 28 : undefined }}>
         <View
           style={{ flexDirection: "row", alignItems: "center", padding: 15 }}
         >
-         <TouchableOpacity onPress={()=>navigation.navigate('Home')}>
-         <Ionicons name="chevron-back" size={26} color="black" /></TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+            <Ionicons name="chevron-back" size={26} color="black" />
+          </TouchableOpacity>
           <Text
             style={{
               marginLeft: 130,
@@ -163,7 +169,7 @@ const ProfileScreen = ({ navigation }) => {
             }}
           >
             <Image
-              source={require('../Assets/images/naruto.png')}
+              source={require("../Assets/images/naruto.png")}
               style={{
                 width: 70,
                 height: 70,
@@ -248,199 +254,261 @@ const ProfileScreen = ({ navigation }) => {
 
         <View
           style={{
-            position:"absolute",
-            top:300,
-            width:width-20,
+            position: "absolute",
+            top: 300,
+            width: width - 20,
             padding: 20,
-           
-            backgroundColor:"white",
-            left:10,
-            borderTopLeftRadius:20,
-            borderTopRightRadius:20,
 
-            
-            
+            backgroundColor: "white",
+            left: 10,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
           }}
         >
-        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
           <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 5,
-            }}
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-          <MaterialIcons name="payment" size={24} color="black" />
-            <Text
+            <View
               style={{
-                fontSize: 14,
-                color: "black",
-                textAlign: "center",
-                marginLeft: 3,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
               }}
             >
-              Payment Method
-            </Text>
+              <MaterialIcons name="payment" size={24} color="black" />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: "black",
+                  textAlign: "center",
+                  marginLeft: 3,
+                }}
+              >
+                Payment Method
+              </Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Entypo
+                name="chevron-right"
+                size={25}
+                color="black"
+                style={{ marginTop: 3 }}
+              />
+            </View>
           </View>
-          
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 20,
+            }}
+            onPress={() => navigation.navigate("Fav")}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <MaterialIcons name="favorite" size={24} color="black" />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: "black",
+                  textAlign: "center",
+                  marginLeft: 3,
+                }}
+              >
+                Your Favorites
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Entypo
+                name="chevron-right"
+                size={25}
+                color="black"
+                style={{ marginTop: 3 }}
+              />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 20,
+            }}
+            onPress={() => navigation.navigate("Cart")}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <MaterialIcons name="shopping-bag" size={24} color="black" />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: "black",
+                  textAlign: "center",
+                  marginLeft: 3,
+                }}
+              >
+                Cart
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Entypo
+                name="chevron-right"
+                size={25}
+                color="black"
+                style={{ marginTop: 3 }}
+              />
+            </View>
+          </TouchableOpacity>
           <View
             style={{
               flexDirection: "row",
-              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 20,
             }}
           >
-            
-            <Entypo
-              name="chevron-right"
-              size={25}
-              color="black"
-              style={{ marginTop: 3 }}
-            />
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="form-textbox-password"
+                size={24}
+                color="black"
+              />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: "black",
+                  textAlign: "center",
+                  marginLeft: 3,
+                }}
+              >
+                Change Password
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Entypo
+                name="chevron-right"
+                size={25}
+                color="black"
+                style={{ marginTop: 3 }}
+              />
+            </View>
           </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 20,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <Entypo name="help-with-circle" size={24} color="black" />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: "black",
+                  textAlign: "center",
+                  marginLeft: 3,
+                }}
+              >
+                Get Help
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Entypo
+                name="chevron-right"
+                size={25}
+                color="black"
+                style={{ marginTop: 3 }}
+              />
+            </View>
           </View>
-          <TouchableOpacity style={{flexDirection:"row",justifyContent:"space-between",marginTop:20}} onPress={()=>navigation.navigate('Fav')}>
-          <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-        <MaterialIcons name="favorite" size={24} color="black" />
-          <Text
+          <TouchableOpacity
             style={{
-              fontSize: 14,
-              color: "black",
-              textAlign: "center",
-              marginLeft: 3,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 20,
             }}
+            onPress={handleLogout}
           >
-            Your Favorites
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          
-          <Entypo
-            name="chevron-right"
-            size={25}
-            color="black"
-            style={{ marginTop: 3 }}
-          />
-        </View>
-        </TouchableOpacity>
-          <View style={{flexDirection:"row",justifyContent:"space-between",marginTop:20}}>
-          <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-        <MaterialCommunityIcons name="form-textbox-password" size={24} color="black" />
-          <Text
-            style={{
-              fontSize: 14,
-              color: "black",
-              textAlign: "center",
-              marginLeft: 3,
-            }}
-          >
-            Change Password
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          
-          <Entypo
-            name="chevron-right"
-            size={25}
-            color="black"
-            style={{ marginTop: 3 }}
-          />
-        </View>
-        </View>
-        <View style={{flexDirection:"row",justifyContent:"space-between",marginTop:20}}>
-        <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 5,
-        }}
-      >
-      <Entypo name="help-with-circle" size={24} color="black" />
-        <Text
-          style={{
-            fontSize: 14,
-            color: "black",
-            textAlign: "center",
-            marginLeft: 3,
-          }}
-        >
-         Get Help
-        </Text>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        
-        <Entypo
-          name="chevron-right"
-          size={25}
-          color="black"
-          style={{ marginTop: 3 }}
-        />
-      </View>
-      </View>
-       <TouchableOpacity style={{flexDirection:"row",justifyContent:"space-between",marginTop:20}} onPress={handleLogout}>
-          <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-        <AntDesign name="logout" size={24} color="red" />
-          <Text
-            style={{
-              fontSize: 14,
-              color: "red",
-              textAlign: "center",
-              marginLeft: 3,
-            }}
-          >
-            Log Out
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          
-          <Entypo
-            name="chevron-right"
-            size={25}
-            color="black"
-            style={{ marginTop: 3 }}
-          />
-        </View>
-        </TouchableOpacity>
-          
-
-
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <AntDesign name="logout" size={24} color="red" />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: "red",
+                  textAlign: "center",
+                  marginLeft: 3,
+                }}
+              >
+                Log Out
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Entypo
+                name="chevron-right"
+                size={25}
+                color="black"
+                style={{ marginTop: 3 }}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
