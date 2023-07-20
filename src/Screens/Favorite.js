@@ -7,6 +7,7 @@ import { Colors } from '../Assets';
 
 import { AntDesign } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import { Platform } from 'react-native';
 const { width, height } = Dimensions.get("window");
 
 const Favorite = (
@@ -91,8 +92,8 @@ const Favorite = (
 
   return (
     <SafeAreaView style={styles.container}>
-    <View style={{marginTop:20}}>
-     <TouchableOpacity onPress={()=>navigation.goBack()} style={{position:"absolute",top:6,left:5,zIndex:999}}>
+    <View style={{marginTop:10}}>
+     <TouchableOpacity onPress={()=>navigation.goBack()} style={{position:"absolute",top:2,left:Platform.OS==="ios"?12:6,zIndex:999}}>
      <AntDesign name="back" size={24} color="black" />
      </TouchableOpacity>
       <Text style={styles.header}>Favorite Products</Text>
@@ -109,7 +110,7 @@ const Favorite = (
          <Text style={styles.productName}>{item.title}</Text>
          <Text style={styles.productPrice}>{item.price}</Text>
          </View>
-         <TouchableOpacity onPress={() => removeFromWishlist(item._id)} style={{top:30,position:"absolute",right:15}}>
+         <TouchableOpacity onPress={() => removeFromWishlist(item._id)} style={{top:30,position:"absolute",right:20}}>
          <AntDesign name="delete" size={24} color="black" />
          </TouchableOpacity>
           </View>
@@ -140,7 +141,8 @@ const styles = StyleSheet.create({
     width:width-40,
     backgroundColor:Colors.burlywood,
     height:90,
-    borderRadius:30
+    borderRadius:30,
+    marginLeft:Platform.OS==="ios"?15:0
   },
   productName: {
     fontSize: 18,

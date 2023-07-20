@@ -6,6 +6,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Image,
+  Modal
 } from "react-native";
 import React from "react";
 import Icon from "@expo/vector-icons/Ionicons";
@@ -17,14 +18,42 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
 import Toast from 'react-native-toast-message';
+import { useCart } from '../Hooks/userContext';
 
 const { width, height } = Dimensions.get("window");
+
 
 const ProductPage = ({ navigation, route }) => {
   const [count, setCount] = useState(1);
   const [saved, setSaved] = useState(false);
 
   const [user, setUser] = useState(null);
+
+  const { cartDispatch } = useCart();
+
+
+
+const addToCart = () => {
+  const itemToAdd = { _id: item._id, title: item.title, price: item.price, quantity: count,image:item.imageUrl };
+
+  cartDispatch({
+    type: 'ADD_TO_CART',
+    payload: itemToAdd,
+  });
+
+  console.log('Added to Cart:', itemToAdd);
+
+  // Show the toast message for successful addition to the cart
+  Toast.show({
+    type: 'success',
+    text1: 'Added to Cart',
+    visibilityTime: 2000, // 2 seconds
+    autoHide: true,
+  });
+};
+
+  // State variable to control the visibility of the cart modal
+  const [isCartModalVisible, setCartModalVisible] = useState(false);
 
   useEffect(() => {
     retrieveToken();
@@ -48,7 +77,10 @@ const ProductPage = ({ navigation, route }) => {
  
 
   const { item } = route.params;
-  
+  const calculateTotalAmount = () => {
+    // Assuming that the price of the product is in `item.price` and quantity is in `count`
+    return item.price * count;
+  };
   const Increment = () => {
     setCount(count + 1);
   };
@@ -60,6 +92,7 @@ const ProductPage = ({ navigation, route }) => {
   const userId = user?.userId; // Replace with the actual userId
   const productId = item?._id;
   const addToWishlist = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     try {
       const response = await axios.post(`https://productserver-4mtw.onrender.com/api/v1/user/${userId}/wishlist/${productId}`);
       
@@ -97,7 +130,7 @@ const ProductPage = ({ navigation, route }) => {
           flexDirection: "row",
           position: "absolute",
           zIndex: 999,
-          top: Platform.OS === "android" ? 43 : 52,
+          top: Platform.OS === "android" ? 23 : 62,
           width: width - 40,
         }}
       >
@@ -118,7 +151,7 @@ const ProductPage = ({ navigation, route }) => {
           uri: item.imageUrl,
         }}
         style={{
-          aspectRatio: Platform.OS === "android" ? 1 : 1.5,
+          aspectRatio: Platform.OS === "android" ? 1 : 1,
           resizeMode: "cover",
         }}
       />
@@ -282,7 +315,9 @@ const ProductPage = ({ navigation, route }) => {
             </Text>
           </TouchableOpacity>
 
-          <View
+          <TouchableOpacity  onPress={() => {
+            addToCart()
+          }}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -299,13 +334,81 @@ const ProductPage = ({ navigation, route }) => {
               color="white"
               style={{ alignItems: "center", justifyContent: "center" }}
             />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
+      <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isCartModalVisible}
+      onRequestClose={() => setCartModalVisible(false)}
+    >
+      <View style={styles.cartModalContainer}>
+        <View style={styles.cartModalContent}>
+          {/* Cart items and total amount */}
+          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Cart Items:</Text>
+         
+          {[
+            { productId: "12345", quantity: 2 },
+            { productId: "67890", quantity: 1 },
+          ].map((item) => (
+            <Text key={item.productId} style={{ fontSize: 16 }}>
+              {item.productId} - Quantity: {item.quantity}
+            </Text>
+          ))}
+          <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 10 }}>
+            Total Cart Amount:
+          </Text>
+          <Text style={{ fontSize: 16 }}>{calculateTotalAmount()}</Text>
+
+          {/* Close button */}
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setCartModalVisible(false)}
+          >
+            <Text style={{ fontSize: 18, color: "white" }}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
     </SafeAreaView>
   );
 };
 
 export default ProductPage;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  cartModalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  cartModalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: "100%",
+    maxHeight: height * 0.6,
+  },
+  closeButton: {
+    backgroundColor: "black",
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  addToCartButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.black,
+    borderRadius: 10,
+    width: width - 40,
+    padding: 15,
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+  },
+});

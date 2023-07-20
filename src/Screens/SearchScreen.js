@@ -31,7 +31,7 @@ try {
 
   const navigation=useNavigation()
   return (
-    <SafeAreaView style={{flex:1,marginTop:45}}>
+    <SafeAreaView style={{flex:1,marginTop:15}}>
     <View
     
       style={{

@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   Text,
   Dimensions,
+  ActivityIndicator,
+  StatusBar,
+  useColorScheme,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,19 +25,23 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
-  const handleLogin = async () => {
+
+   const handleLogin = async () => {
     try {
       if (!validateEmail(email)) {
         setErrorMessage('Invalid email address');
         return;
       }
       setErrorMessage('');
+      setIsLoading(true); // Set loading state to true when login starts
+
       const response = await axios.post(
         "https://productserver-4mtw.onrender.com/api/v1/user/login",
         {
@@ -43,14 +50,14 @@ const LoginScreen = ({ navigation }) => {
         }
       );
       const { token } = response.data;
-  
+
       setEmail("");
       setPassword("");
-  
+
       // Save the token to AsyncStorage
       await AsyncStorage.setItem("token", token);
       navigation.navigate("bottom");
-  
+
       // Show toast message for successful login
       Toast.show({
         type: 'success',
@@ -61,7 +68,7 @@ const LoginScreen = ({ navigation }) => {
       });
     } catch (error) {
       console.log(error);
-  
+
       // Show toast message for login error
       Toast.show({
         type: 'error',
@@ -71,8 +78,12 @@ const LoginScreen = ({ navigation }) => {
         visibilityTime: 3000, // 3 seconds
         autoHide: true,
       });
+    } finally {
+      setIsLoading(false); // Set loading state to false when login finishes (whether success or failure)
     }
   };
+
+
   const togglePasswordVisibility = () => {
     setIsPasswordVisible((prev) => !prev);
   };
@@ -88,6 +99,7 @@ const LoginScreen = ({ navigation }) => {
       console.log(error);
     }
   };
+  const colorScheme = useColorScheme();
 
   // Call the checkLoggedIn function in the component's useEffect hook
   useEffect(() => {
@@ -95,6 +107,10 @@ const LoginScreen = ({ navigation }) => {
   }, []);
   return (
     <View style={styles.container}>
+    <StatusBar
+    barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+    backgroundColor={colorScheme === "dark" ? "#0C1C2C" : "white"}
+  />
       <View style={{ backgroundColor: "#0C1C2C", height: 260, width: width }}>
         <View style={{ position: "absolute", top: 100, left: 20 }}>
           <Text style={{ fontSize: 32, fontWeight: "bold", color: "white" }}>
@@ -150,19 +166,25 @@ const LoginScreen = ({ navigation }) => {
           Forgot password ?
         </Text>
         <TouchableOpacity
-          onPress={handleLogin}
-          style={{
-            top: 15,
-            backgroundColor: "#C0E863",
-            width: width - 50,
-            padding: 15,
-            borderRadius: 10,
-          }}
-        >
+        onPress={handleLogin}
+        style={{
+          top: 15,
+          backgroundColor: "#C0E863",
+          width: width - 50,
+          padding: 15,
+          borderRadius: 10,
+          opacity: isLoading ? 0.7 : 1, // Adjust the opacity of the button when loading
+        }}
+        disabled={isLoading} // Disable the button while loading
+      >
+        {isLoading ? ( // Show loading indicator if isLoading is true
+          <ActivityIndicator color="black" size={18} />
+        ) : (
           <Text style={{ fontSize: 14, textAlign: "center", color: "black" }}>
             Login
           </Text>
-        </TouchableOpacity>
+        )}
+      </TouchableOpacity>
         {errorMessage ? <Text style={{ color: 'red',top:15 }}>{errorMessage}</Text> : null}
         <View style={{ top: 50, flexDirection: "row" }}>
           <View

@@ -18,7 +18,7 @@ const Arrivals = () => {
     <SafeAreaView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
       <View
         style={{
-          marginTop: Platform.OS === "android" ? 33 : undefined,
+          marginTop: Platform.OS === "android" ? 7 : undefined,
           borderBottomLeftRadius: 10,
           borderBottomRightRadius: 10,
         }}

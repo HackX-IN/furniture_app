@@ -80,7 +80,7 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ marginTop: Platform.OS === "android" ? 28 : undefined }}>
+      <View style={{ marginTop: Platform.OS === "android" ? 8 : undefined }}>
         <View
           style={{ flexDirection: "row", alignItems: "center", padding: 15 }}
         >

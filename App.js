@@ -17,10 +17,9 @@ import axios from "axios";
 import Arrivals from "./src/Screens/Arrivals";
 import LoginScreen from "./src/Screens/Login";
 import Register from "./src/Screens/Register";
-import { UserContextProvider } from "./src/Hooks/userContext";
+import { CartProvider } from "./src/Hooks/userContext";
 import Toast from "react-native-toast-message";
 import Favorite from "./src/Screens/Favorite";
-
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +52,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
+    <CartProvider>
      
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen
@@ -92,7 +92,7 @@ export default function App() {
           />
         </Stack.Navigator>
         <Toast ref={(ref) => Toast.setRef(ref)} />
-     
+        </CartProvider>
     </NavigationContainer>
   );
 }

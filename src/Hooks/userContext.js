@@ -1,32 +1,86 @@
-import axios from 'axios';
-import { createContext, useState, useEffect } from 'react';
+import React, { createContext, useReducer, useContext } from "react";
 
-export const userContext = createContext({});
+const CartContext = createContext();
 
-export function UserContextProvider({ children }) {
-  const [user, setUser] = useState(null);
+const cartReducer = (state, action) => {
+  switch (action.type) {
+    case "ADD_TO_CART":
+      const existingItem = state.cartItems.find(
+        (item) => item._id === action.payload._id
+      );
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await axios.get('https://productserver-4mtw.onrender.com/api/v1/user/profile');
-        const userData = response.data;
-        setUser(userData);
-      } catch (error) {
-        console.error(error);
+      if (existingItem) {
+        // If the item already exists in the cart, update its quantity
+        return {
+          ...state,
+          cartItems: state.cartItems.map((item) =>
+            item._id === action.payload._id
+              ? { ...item, quantity: item.quantity + action.payload.quantity }
+              : item
+          ),
+        };
+      } else {
+        // If the item is not in the cart, add it as a new entry
+        return {
+          ...state,
+          cartItems: [...state.cartItems, action.payload],
+        };
       }
-    };
+    case "REMOVE_FROM_CART":
+      return {
+        ...state,
+        cartItems: state.cartItems.filter(
+          (item) => item._id !== action.payload
+        ),
+      };
+    case "INCREMENT_QUANTITY":
+      return {
+        ...state,
+        cartItems: state.cartItems.map((item) =>
+          item._id === action.payload
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        ),
+      };
+    case "DECREMENT_QUANTITY":
+      return {
+        ...state,
+        cartItems: state.cartItems.map((item) =>
+          item._id === action.payload
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        ),
+      };
+    case "CLEAR_CART":
+      return {
+        ...state,
+        cartItems: [],
+      };
+    default:
+      return state;
+  }
+};
 
-    if (!user) {
-      fetchUserProfile();
-    }
-  }, []);
+const CartProvider = ({ children }) => {
+  const initialState = {
+    cartItems: [],
+  };
+
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
   return (
-    <userContext.Provider value={{ user, setUser }}>
+    <CartContext.Provider value={{ cartState: state, cartDispatch: dispatch }}>
       {children}
-    </userContext.Provider>
+    </CartContext.Provider>
   );
-}
+};
 
-// Rest of the code...
+const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+};
+
+export { CartProvider, useCart };
