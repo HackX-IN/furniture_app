@@ -56,6 +56,12 @@ const cartReducer = (state, action) => {
         ...state,
         cartItems: [],
       };
+      case "RESTORE_CART":
+      return {
+        ...state,
+        cartItems: action.payload,
+      };
+
     default:
       return state;
   }

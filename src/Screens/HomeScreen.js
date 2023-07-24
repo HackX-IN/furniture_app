@@ -9,6 +9,9 @@ import {
   StatusBar,
   useColorScheme,
   ActivityIndicator,
+  Alert,
+  Image,
+  BackHandler,
 } from "react-native";
 import React from "react";
 import Icon from "@expo/vector-icons/FontAwesome";
@@ -19,7 +22,7 @@ import Swiper from "../Components/Swiper";
 import Showcard from "../Components/Showcard";
 import { useCart } from "../Hooks/userContext";
 
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 import { useEffect } from "react";
 import { useState } from "react";
 
@@ -31,19 +34,33 @@ const HomeScreen = ({ navigation }) => {
   const [locationName, setLocationName] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    getLocationName();
+  }, []);
 
   const getLocationName = async () => {
     try {
-      const { coords } = {"coords": {"accuracy": 100, "altitude": 0, "altitudeAccuracy": 0, "heading": 0, "latitude": 12.7940085, "longitude": 78.7156668, "speed": 0}, "mocked": false, "timestamp": 1689874218336};
-  
-      const location = await Location.reverseGeocodeAsync({
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      });
+      // Check if the app has location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied.");
+        setLoading(false);
+        return
+      }
+
      
-      if (location && location.length > 0) {
-        const { city, region } = location[0];
-        const locationName = `${city}, ${region}`; // Combine city and region
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+
+      const geocode = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+      console.log(geocode);
+      if (geocode && geocode.length > 0) {
+        const { city, region } = geocode[0];
+        const locationName = `${city}, ${region}`; 
         setLocationName(locationName);
         setLoading(false);
       } else {
@@ -52,15 +69,10 @@ const HomeScreen = ({ navigation }) => {
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Failed to get location name.");
+      setLoading(false);
     }
   };
-  
-  
-  useEffect(() => {
-    getLocationName();
-  }, []);
 
- 
 
   const colorScheme = useColorScheme();
   return (
@@ -79,23 +91,29 @@ const HomeScreen = ({ navigation }) => {
           backgroundColor: Colors.white,
         }}
       >
-        <Icon name="map-pin" size={Sizes["2xl"]} color={Colors.green} />
-        {loading ? (
-          <ActivityIndicator color="green" size="small" />
-        ) : (<Text style={{ fontSize: Sizes.xl, fontWeight: "bold" }}>
-
-        {locationName}
-        </Text>)}
-        
+        <Image
+          source={require("../Assets/images/Icon.png")}
+          style={{ width: 40, height: 40 }}
+        />
+        <View style={{ flexDirection: "row", gap: 5 }}>
+          <Icon name="map-pin" size={Sizes["2xl"]} color={Colors.green} />
+          {loading ? (
+            <ActivityIndicator color="green" size="small" />
+          ) : (
+            <Text style={{ fontSize: Sizes.xl, fontWeight: "bold" }}>
+              {locationName || "Ambur,TamilNadu"}
+            </Text>
+          )}
+        </View>
         <View
           style={{
             position: "absolute",
-            top: 5,
+            top: 14,
             right: 8,
             width: Sizes.lg,
             height: Sizes.lg,
             borderRadius: Sizes.md / 2,
-            backgroundColor: Colors.green,
+            backgroundColor: Colors.black,
             alignItems: "flex-end",
           }}
         >

@@ -25,6 +25,7 @@ import Toast from "react-native-toast-message";
 
 import { Dimensions } from "react-native";
 import { ActivityIndicator } from "react-native";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,6 +34,7 @@ const ProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     retrieveToken();
+    getGoogleUserDetails ()
   }, []);
 
   const retrieveToken = async () => {
@@ -77,6 +79,39 @@ const ProfileScreen = ({ navigation }) => {
       });
     }
   };
+  const getGoogleUserDetails = async () => {
+    try {
+      // Check if user is already signed in
+      const isSignedIn = await GoogleSignin.isSignedIn();
+
+      if (!isSignedIn) {
+        // User is not signed in, show error message or handle sign-in flow
+        Toast.show({
+          type: "error",
+          text1: "Not Signed In",
+          text2: "Please sign in with Google.",
+          position: "top",
+          visibilityTime: 3000, // 3 seconds
+          autoHide: true,
+        });
+        return;
+      }
+
+      // Get the user info
+      const userInfo = await GoogleSignin.signInSilently();
+      console.log(userInfo)
+      setUser(userInfo.user);
+
+    } catch (error) {
+      console.log("Google Sign-In Error:", error);
+
+      // Handle specific error codes if needed
+      if (error.code === statusCodes.SIGN_IN_REQUIRED) {
+        // User needs to sign in
+        // Show error message or handle sign-in flow
+      }
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -102,7 +137,7 @@ const ProfileScreen = ({ navigation }) => {
         <View
           style={{
             width: width - 40,
-            backgroundColor: Colors.green,
+            backgroundColor: "#DEB887",
             padding: 15,
             alignItems: "center",
             marginLeft: 20,
@@ -156,7 +191,7 @@ const ProfileScreen = ({ navigation }) => {
             top: 100,
             left: 20,
             width: width - 40,
-            backgroundColor: Colors.black,
+            backgroundColor: "#589dc9",
             height: 170,
             borderRadius: 20,
           }}
@@ -165,42 +200,42 @@ const ProfileScreen = ({ navigation }) => {
             style={{
               justifyContent: "center",
               alignItems: "center",
-              padding: 10,
+              padding: 13,
             }}
           >
             <Image
-              source={require("../Assets/images/naruto.png")}
+              source={user?({uri: user.photo}):require("../Assets/images/naruto.png")}
               style={{
-                width: 70,
-                height: 70,
+                width: 80,
+                height: 80,
                 borderRadius: 50,
                 borderWidth: 1,
-                borderColor: "white",
+                borderColor: "black",
                 resizeMode: "cover",
               }}
             />
             {user ? (
               <>
                 <Text
-                  style={{ fontSize: 17, fontWeight: "600", color: "white" }}
+                  style={{ fontSize: 20, fontWeight: "bold", color: "black" }}
                 >
                   {user.name}
                 </Text>
                 <Text
-                  style={{ fontSize: 14, fontWeight: "400", color: "white" }}
+                  style={{ fontSize: 14, fontWeight: "400", color: "black" }}
                 >
                   {user.email}
                 </Text>
               </>
             ) : (
-              <ActivityIndicator size={22} color="white" />
+              <ActivityIndicator size={22} color="black" />
             )}
           </View>
           <View
             style={{
               width: width - 70,
               left: 10,
-              backgroundColor: "white",
+              backgroundColor: "#736368",
 
               borderRadius: 20,
               flexDirection: "row",
@@ -223,7 +258,7 @@ const ProfileScreen = ({ navigation }) => {
               <Text
                 style={{
                   fontSize: 12,
-                  color: "black",
+                  color: "white",
                   textAlign: "center",
                   marginLeft: 3,
                 }}
@@ -238,14 +273,14 @@ const ProfileScreen = ({ navigation }) => {
               }}
             >
               <Text
-                style={{ fontSize: 12, color: "black", textAlign: "center" }}
+                style={{ fontSize: 12, color: "white", textAlign: "center" }}
               >
                 See Benefits
               </Text>
               <Entypo
                 name="chevron-right"
                 size={25}
-                color="black"
+                color="white"
                 style={{ marginTop: 3 }}
               />
             </View>
@@ -257,7 +292,7 @@ const ProfileScreen = ({ navigation }) => {
             position: "absolute",
             top: 300,
             width: width - 20,
-            padding: 20,
+            padding: 25,
 
             backgroundColor: "white",
             left: 10,
@@ -343,6 +378,7 @@ const ProfileScreen = ({ navigation }) => {
               />
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={{
               flexDirection: "row",
@@ -428,7 +464,8 @@ const ProfileScreen = ({ navigation }) => {
               />
             </View>
           </View>
-          <View
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Help")}
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
@@ -467,7 +504,7 @@ const ProfileScreen = ({ navigation }) => {
                 style={{ marginTop: 3 }}
               />
             </View>
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity
             style={{
               flexDirection: "row",

@@ -19,7 +19,7 @@ import axios from "axios";
 import jwt_decode from "jwt-decode";
 import Toast from 'react-native-toast-message';
 import { useCart } from '../Hooks/userContext';
-
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 const { width, height } = Dimensions.get("window");
 
 
@@ -31,6 +31,39 @@ const ProductPage = ({ navigation, route }) => {
 
   const { cartDispatch } = useCart();
 
+  const getGoogleUserDetails = async () => {
+    try {
+      // Check if user is already signed in
+      const isSignedIn = await GoogleSignin.isSignedIn();
+
+      if (!isSignedIn) {
+        // User is not signed in, show error message or handle sign-in flow
+        Toast.show({
+          type: "error",
+          text1: "Not Signed In",
+          text2: "Please sign in with Google.",
+          position: "top",
+          visibilityTime: 3000, // 3 seconds
+          autoHide: true,
+        });
+        return;
+      }
+
+      // Get the user info
+      const userInfo = await GoogleSignin.signInSilently();
+      console.log(userInfo)
+      setUser(userInfo.user);
+
+    } catch (error) {
+      console.log("Google Sign-In Error:", error);
+
+      // Handle specific error codes if needed
+      if (error.code === statusCodes.SIGN_IN_REQUIRED) {
+        // User needs to sign in
+        // Show error message or handle sign-in flow
+      }
+    }
+  };
 
 
 const addToCart = () => {
@@ -57,6 +90,7 @@ const addToCart = () => {
 
   useEffect(() => {
     retrieveToken();
+    getGoogleUserDetails();
   }, []);
 
   const retrieveToken = async () => {
@@ -91,6 +125,8 @@ const addToCart = () => {
   };
   const userId = user?.userId; // Replace with the actual userId
   const productId = item?._id;
+
+  
   const addToWishlist = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     try {
@@ -109,7 +145,7 @@ const addToCart = () => {
       
       Toast.show({
         type: 'error',
-        text1: 'Login Failed',
+        text1: 'User Not Found',
         text2: 'Please check your email and password.',
         position: 'top',
         visibilityTime: 3000, // 3 seconds

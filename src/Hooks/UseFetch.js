@@ -14,7 +14,7 @@ const useFetch = () => {
         setLoading(true)
         try {
             const response=await axios.get("https://productserver-4mtw.onrender.com/api/v1/getall")
-            console.log(response.data)
+            // console.log(response.data)
             setData(response.data)
           
             setLoading(false)

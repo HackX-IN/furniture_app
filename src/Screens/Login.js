@@ -14,7 +14,8 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from 'react-native-toast-message';
-
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
 import { Feather, Entypo, AntDesign } from "@expo/vector-icons";
 import { Sizes, Colors } from "../Assets/index";
 
@@ -27,20 +28,75 @@ const LoginScreen = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  GoogleSignin.configure({
+    webClientId: '144192600594-4p75aro9ksn7k5k1inpn2682d06tqhr5.apps.googleusercontent.com',
+  });
+  const GoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  
+      const { idToken } = await GoogleSignin.signIn();
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+  
+      setIsLoading(true);
+  
+      try {
+        const userCredential = await auth().signInWithCredential(googleCredential);
+        if (userCredential && userCredential.user) {
+          // User is signed in successfully
+          navigation.navigate("bottom");
+        } else {
+          console.log("User sign-in failed.");
+          Toast.show({
+            type: 'error',
+            text1: 'Login Failed',
+            text2: 'Please check your email and password.',
+            position: 'top',
+            visibilityTime: 3000, // 3 seconds
+            autoHide: true,
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: 'Login Failed',
+          text2: 'Please check your email and password.',
+          position: 'top',
+          visibilityTime: 3000, // 3 seconds
+          autoHide: true,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: 'Please check your email and password.',
+        position: 'top',
+        visibilityTime: 3000, // 3 seconds
+        autoHide: true,
+      });
+    }
+  };
+  
+  
 
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-   const handleLogin = async () => {
+  const handleLogin = async () => {
     try {
       if (!validateEmail(email)) {
         setErrorMessage('Invalid email address');
         return;
       }
       setErrorMessage('');
-      setIsLoading(true); // Set loading state to true when login starts
+      setIsLoading(true);
 
       const response = await axios.post(
         "https://productserver-4mtw.onrender.com/api/v1/user/login",
@@ -54,35 +110,30 @@ const LoginScreen = ({ navigation }) => {
       setEmail("");
       setPassword("");
 
-      // Save the token to AsyncStorage
       await AsyncStorage.setItem("token", token);
       navigation.navigate("bottom");
 
-      // Show toast message for successful login
       Toast.show({
         type: 'success',
         text1: 'Login Successful',
         position: 'top',
-        visibilityTime: 2000, // 2 seconds
+        visibilityTime: 2000,
         autoHide: true,
       });
     } catch (error) {
       console.log(error);
-
-      // Show toast message for login error
       Toast.show({
         type: 'error',
         text1: 'Login Failed',
         text2: 'Please check your email and password.',
         position: 'top',
-        visibilityTime: 3000, // 3 seconds
+        visibilityTime: 3000,
         autoHide: true,
       });
     } finally {
-      setIsLoading(false); // Set loading state to false when login finishes (whether success or failure)
+      setIsLoading(false);
     }
   };
-
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible((prev) => !prev);
@@ -92,16 +143,23 @@ const LoginScreen = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (token) {
-        // Token found, navigate to the profile screen or any other authenticated screen
+        // If the token exists, the user is already logged in using email/password
         navigation.navigate("bottom");
+      } else {
+        // If the token doesn't exist, check if the user is signed in with Google
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        const isSignedIn = await GoogleSignin.isSignedIn();
+        if (isSignedIn) {
+          // User is signed in with Google, navigate to the "bottom" screen
+          navigation.navigate("bottom");
+        }
       }
     } catch (error) {
       console.log(error);
     }
-  };
+  }
   const colorScheme = useColorScheme();
 
-  // Call the checkLoggedIn function in the component's useEffect hook
   useEffect(() => {
     checkLoggedIn();
   }, []);
@@ -223,7 +281,7 @@ const LoginScreen = ({ navigation }) => {
         <View style={{top:100,flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
         
         <TouchableOpacity
-          onPress={handleLogin}
+          onPress={GoogleLogin}
           style={{
             top: 15,
             borderWidth: 1,

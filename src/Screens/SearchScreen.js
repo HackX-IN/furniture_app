@@ -47,7 +47,9 @@ try {
       }}
     >
       <View style={{ flexDirection: "row", gap: 13 }}>
+      <TouchableOpacity onPress={console.log('pressed')}>
       <Icon name="camera" size={22} color={Colors.black} />
+      </TouchableOpacity>
         
         <TextInput
           placeholder="Search...."

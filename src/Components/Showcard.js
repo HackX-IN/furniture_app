@@ -1,13 +1,18 @@
-import { View, Text, FlatList, Image, Dimensions, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
 const { width, height } = Dimensions.get("window");
 import { Colors } from "../Assets/index.js";
 import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator } from "react-native";
-import useFetch from '../Hooks/UseFetch.js';
-
-
+import useFetch from "../Hooks/UseFetch.js";
 
 // const List = [
 //   {
@@ -85,96 +90,88 @@ import useFetch from '../Hooks/UseFetch.js';
 // ];
 
 const Showcard = () => {
+  const { data, loading, error } = useFetch();
 
- const {data,loading,error}=useFetch()
-
-
-    const navigation=useNavigation()
+  const navigation = useNavigation();
   return (
     <View style={{ padding: 10, marginTop: 2 }}>
-
-    {
-      loading?(
-      <ActivityIndicator size={32} color="black"/>
-      ):error?(
+      {loading ? (
+        <ActivityIndicator size={32} color="black" />
+      ) : error ? (
         <Text>Something Went Wrong</Text>
-      ):(
+      ) : (
         <FlatList
-        contentContainerStyle={{ paddingHorizontal: 5, gap: 10 }}
-        
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={data}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item, index }) => {
-          return (
-            <TouchableOpacity
-             onPress={()=>navigation.navigate('Product',{ item:item})}
-              style={{
-                height: height * 0.3,
-                width: width * 0.45,
-               
-             
-                
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  style={{ flex: 1, }}
-                />
-                <View style={{ flexDirection: "row",
-                justifyContent: "space-between",
-                padding: 5,
-                alignItems: "center",  backgroundColor: Colors.burlywood,}}>
-                <Text style={{
-                  fontSize: 18,
-                  color: "black",
-                  fontWeight: "700",
-                  marginLeft:6,
-                  marginBottom:-8
-                }}>{item.supplier}</Text>
-               
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    padding: 15,
-                    backgroundColor: Colors.burlywood,
-                    alignItems: "center",
-                    borderBottomLeftRadius:10,
-                    borderBottomRightRadius:10
-                  }}
-                >
-                  <Text
+          contentContainerStyle={{ paddingHorizontal: 5, gap: 10 }}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={data}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item, index }) => {
+            return (
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Product", { item: item })}
+                style={{
+                  height: height * 0.3,
+                  width: width * 0.45,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Image source={{ uri: item.imageUrl }} style={{ flex: 1 }} />
+                  <View
                     style={{
-                      fontSize: 18,
-                      color: "black",
-                      fontWeight: "700",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      padding: 5,
+                      alignItems: "center",
+                      backgroundColor: Colors.burlywood,
                     }}
                   >
-                    {item.price}.00
-                  </Text>
-                  <TouchableOpacity
-                 
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        color: "black",
+                        fontWeight: "700",
+                        marginLeft: 6,
+                        marginBottom: -8,
+                      }}
+                    >
+                      {item.supplier}
+                    </Text>
+                  </View>
+                  <View
                     style={{
-                    
-                      borderRadius: 5,
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      padding: 15,
+                      backgroundColor: Colors.burlywood,
+                      alignItems: "center",
+                      borderBottomLeftRadius: 10,
+                      borderBottomRightRadius: 10,
                     }}
                   >
-                   <Ionicons name="add-circle" size={24} color="black"/>
-                  </TouchableOpacity>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        color: "black",
+                        fontWeight: "700",
+                      }}
+                    >
+                      {item.price}.00
+                    </Text>
+                    <TouchableOpacity
+                      style={{
+                        borderRadius: 5,
+                      }}
+                    >
+                      <Ionicons name="add-circle" size={24} color="black" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
-      />
-      )
-    }
-
-     
+              </TouchableOpacity>
+            );
+          }}
+        />
+      )}
     </View>
   );
 };
